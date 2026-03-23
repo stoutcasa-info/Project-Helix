@@ -7,7 +7,8 @@
 
 ## Executive Summary
 
-The **Project Helix Cloud Lab Series** is a set of parallel, 30-day hands-on training modules that all simulate the same enterprise data migration scenario across different platforms. Each lab migrates data from a legacy, non-normalized flat-file / legacy database (**Source**) into a modern, normalized relational schema (**Target**) but uses platform-specific services and tooling.
+The **Project Helix Cloud Lab Series** is a set of parallel, 30-day hands-on training modules that all simulate the same enterprise data migration scenario across different platforms.
+Each lab migrates data from a legacy, non-normalized flat-file / legacy database (**Source**) into a modern, normalized relational schema (**Target**) but uses platform-specific services and tooling.
 
 All labs share the same storyline:
 
@@ -17,19 +18,20 @@ All labs share the same storyline:
 - Automate infrastructure provisioning with Terraform.
 - Perform verification, documentation, and a “Nuke & Pave” rebuild.
 
-You can complete any single lab as a standalone project, or complete multiple labs to compare how local/Azure-style, AWS, and GCP approaches differ in practice.
+You can complete any single lab as a standalone project, or complete multiple labs to compare how **Azure**, **local**, **AWS**, and **GCP** approaches differ in practice.
 
 ---
 
 ## Lab Overview
 
-| Lab                             | Platform / Stack                                   | Infra Target                          | ETL Engine     | Automation                    |
-|---------------------------------|----------------------------------------------------|---------------------------------------|----------------|------------------------------|
-| Core Helix (Local Containers)   | Local workstation, Docker, MySQL 8.0               | Docker containers (legacy/modern DB)  | Python         | Terraform + Ansible (WSL)    |
-| Helix on AWS                    | AWS Free Tier (S3, RDS MySQL)                      | VPC, S3, RDS MySQL                    | Python         | Terraform + scripts          |
-| Helix on GCP                    | Google Cloud Free Tier (Cloud Storage, Cloud SQL)  | VPC, Cloud Storage, Cloud SQL MySQL   | Python         | Terraform + scripts          |
+| Lab                             | Folder / README                         | Platform / Stack                                      | Infra Target                               | ETL Engine | Automation                      |
+|---------------------------------|-----------------------------------------|--------------------------------------------------------|--------------------------------------------|-----------|---------------------------------|
+| Helix on Azure                  | `helix-azure/` → `Project_Helix_Azure_lab.md` | Azure Free/Sandbox, Azure Database for MySQL          | Azure RG, VNet, Azure MySQL Flexible Server | Python    | Terraform + Ansible (WSL)       |
+| Core Helix (Local Containers)   | `helix-core/` → `README.md`            | Local workstation, Docker, MySQL 8.0                  | Docker containers (legacy/modern DB)       | Python    | Terraform + Ansible (WSL)       |
+| Helix on AWS                    | `helix-aws/` → `README.md`             | AWS Free Tier (S3, RDS MySQL)                         | VPC, S3, RDS MySQL                         | Python    | Terraform + shell/PowerShell   |
+| Helix on GCP                    | `helix-gcp/` → `README.md`             | Google Cloud Free Tier (Cloud Storage, Cloud SQL)     | VPC, Cloud Storage, Cloud SQL (MySQL)      | Python    | Terraform + shell/PowerShell   |
 
-> Note: The “core” Helix implementation (local Docker + Terraform + Ansible) can be used from any OS and conceptually maps well to Azure-style data migration and DevOps workflows.
+READMEs are **foundations**, not step-by-step tutorials: they give you the architecture, goals, and main commands; you are expected to fill in the gaps, research details, and troubleshoot on your own.
 
 ---
 
@@ -56,41 +58,68 @@ FirstName  VARCHAR                      EventID     INT  (PK)
 LastName   VARCHAR                      CategoryCode VARCHAR
 DOB        DATE                         EventDate    DATE
 LegacyID   INT  (traceability)
-Key behaviors in every lab:
+Core behaviors in every lab:
 
-Normalization: Explode category_string into multiple EVENT_LOG rows (1:N).
+Normalization: explode category_string into multiple EVENT_LOG rows (1:N).
 
-Name parsing: Split "LASTNAME, FIRSTNAME" into separate fields.
+Name parsing: split "LASTNAME, FIRSTNAME" into separate fields.
 
-Date standardization: Convert mixed date strings into DATE columns.
+Date standardization: convert mixed date strings into DATE columns.
 
-Verification: Compare row counts and spot check sample records post-migration.
+Verification: compare row counts and spot check sample records after migration.
 
-Lab 1 – Core Project Helix (Local / “Azure-style”)
-Folder: helix-core/
+Lab – Project Helix (Azure Edition)
+Folder: helix-azure/
+Detailed README: helix-azure/Project_Helix_Azure_lab.md
 
 Purpose
-Learn the migration workflow and core data-engineering skills without any cloud accounts, using local Docker containers for both legacy and modern databases.
+Simulate a real-world enterprise migration on Microsoft Azure, moving from a legacy flat-file schema into a normalized schema on Azure Database for MySQL – Flexible Server, using Terraform for infrastructure and Python for ETL.
+Ansible on WSL is used to automate local workstation setup and create a repeatable environment.
+
+Technical Architecture
+Layer	Technology / Service	Purpose
+Cloud Provider	Azure Free Account / Sandbox	Host managed MySQL and networking
+Database	Azure Database for MySQL – Flexible Server	Legacy and modern schemas on a single server
+Infrastructure as Code	Terraform (azurerm provider)	Provision and tear down Azure resources
+ETL Engine	Python (Pandas / SQLAlchemy)	Extract, transform, and load between schemas
+Automation	Ansible on WSL 2	Workstation configuration and repeatable setup
+Design	Visio / draw.io	ER and migration diagrams
+Notes
+Replaces local Docker MySQL with Azure-managed MySQL.
+
+Keeps the Helix 30-day structure: Azure fundamentals, migration, automation, verification, portfolio.
+
+See Project_Helix_Azure_lab.md for the full 30‑day breakdown and specific commands.
+
+Lab – Core Project Helix (Local / “Baseline”)
+Folder: helix-core/
+Detailed README: helix-core/README.md
+
+Purpose
+Learn the migration workflow and core data-engineering skills without any cloud dependencies, using local Docker containers for both legacy and modern databases.
+This is the baseline Helix implementation and conceptually maps well to Azure/DevOps patterns.
 
 Technical Architecture
 Layer	Technology	Purpose
-Infrastructure	Terraform + Docker Provider	Provision legacy and target MySQL DBs
+Infrastructure	Terraform + Docker provider	Provision legacy and target MySQL DBs
 Database	MySQL 8.0 (Docker containers)	Isolated legacy and modern instances
 ETL Engine	Python (Pandas / SQLAlchemy)	Extract, transform, load pipeline
 Automation	Ansible (WSL)	Workstation and environment configuration
 Design	Visio / draw.io	ERD and migration diagrams
-Highlights
+Notes
 No cloud billing risk; everything runs locally via Docker.
 
-Strong focus on Terraform + Ansible automation patterns.
+Strong focus on Terraform + Ansible automation.
 
 Ideal starting point before cloud-specific labs.
 
-Lab 2 – Project AWS Helix (AWS + Terraform)
+Lab – Project AWS Helix
 Folder: helix-aws/
+Detailed README: helix-aws/README.md
 
 Purpose
-Rebuild the Helix migration on AWS Free Tier, using Terraform to provision S3 and RDS, and Python for ETL.
+Rebuild the Helix migration on AWS Free Tier, using Terraform to provision S3 and RDS and Python for ETL.
+You learn AWS fundamentals (VPC, S3, RDS, IAM) while keeping the same migration storyline.
 
 Technical Architecture
 Layer	AWS Service / Tool	Purpose
@@ -99,20 +128,20 @@ Storage	Amazon S3	Store legacy CSV
 Database	Amazon RDS for MySQL (legacy/modern schemas)	Host legacy and normalized schemas
 ETL Engine	Python (Pandas, SQLAlchemy, boto3)	ETL from legacy to modern on RDS
 Automation	Terraform + shell/PowerShell scripts	Deploy infra, run ETL, Nuke & Pave
-Key Differences vs Core Helix
-Where it runs: DBs are on RDS inside a VPC, not Docker on localhost.
+Notes
+Databases run on RDS inside a VPC, not on localhost.
 
-Storage: Legacy CSV is persisted in S3 instead of only a local data/ folder.
+Legacy CSV is persisted in S3 in addition to the local data/ folder.
 
-Access & security: You must handle RDS networking, security groups, and credentials via Terraform and/or cloud secrets.
+Focuses on AWS networking, IAM basics, and cost-aware use of Free Tier.
 
-No Ansible: Automation is primarily Terraform + small scripts; fewer moving parts than the original Ansible layer.
-
-Lab 3 – Project GCP Helix (GCP + Terraform)
+Lab – Project GCP Helix
 Folder: helix-gcp/
+Detailed README: helix-gcp/README.md
 
 Purpose
-Rebuild the Helix migration on Google Cloud Platform, using Terraform to provision Cloud Storage and Cloud SQL, and Python for ETL.
+Rebuild the Helix migration on Google Cloud Platform, using Terraform to provision Cloud Storage and Cloud SQL, with Python for ETL.
+You learn GCP fundamentals while implementing the same migration and verification steps.
 
 Technical Architecture
 Layer	GCP Service / Tool	Purpose
@@ -121,22 +150,24 @@ Storage	Cloud Storage	Store legacy CSV
 Database	Cloud SQL for MySQL (legacy/modern schemas)	Host legacy and normalized schemas
 ETL Engine	Python (Pandas, SQLAlchemy, GCS client)	ETL from legacy to modern on Cloud SQL
 Automation	Terraform + shell/PowerShell scripts	Deploy infra, run ETL, Nuke & Pave
-Key Differences vs Core Helix
-Cloud SQL vs Docker: Legacy and modern DBs live in Cloud SQL, with connection management and service accounts.
+Notes
+Databases run on Cloud SQL, with VPC networking and service accounts.
 
-Cloud Storage vs local: Legacy CSV lives in Cloud Storage instead of only local disk.
+Legacy CSV lives in Cloud Storage rather than only on local disk.
 
-GCP IAM & networking: You learn about service accounts, VPC subnets, and Cloud SQL connectivity patterns.
+Emphasizes GCP IAM, networking, and Cloud SQL connectivity.
 
 Cross-Lab Differences
 Platform Services
-Concern	Core Helix (Local)	AWS Lab	GCP Lab
-Legacy storage	Local CSV	S3 object	Cloud Storage object
-Legacy DB	Docker MySQL container	RDS MySQL (legacy schema)	Cloud SQL MySQL (legacy schema)
-Target DB	Docker MySQL container	RDS MySQL (modern schema)	Cloud SQL MySQL (modern schema)
-Infra IaC	Terraform + Docker provider	Terraform (AWS provider)	Terraform (google provider)
-Config mgmt	Ansible (workstation/bootstrap)	CLI + shell scripts	gcloud + shell scripts
+Concern	Azure Lab	Core Helix (Local)	AWS Lab	GCP Lab
+Legacy storage	Local CSV (Azure-focused context)	Local CSV	S3 object	Cloud Storage object
+Legacy DB	Azure MySQL Flexible Server	Docker MySQL container	RDS MySQL (legacy schema)	Cloud SQL MySQL (legacy schema)
+Target DB	Azure MySQL Flexible Server	Docker MySQL container	RDS MySQL (modern schema)	Cloud SQL MySQL (modern schema)
+Infra IaC	Terraform (azurerm provider)	Terraform + Docker provider	Terraform (AWS provider)	Terraform (google provider)
+Config mgmt	Ansible (WSL)	Ansible (WSL)	CLI + shell/PowerShell scripts	gcloud + shell/PowerShell scripts
 Skills Emphasis
+Azure Helix: Azure fundamentals, Azure Database for MySQL, Terraform on Azure, Ansible-driven workstation automation.
+
 Core Helix: local DevOps, Terraform + Ansible, container-based DBs, core ETL logic.
 
 AWS Helix: AWS fundamentals, VPC, S3, RDS, IAM basics, Terraform on AWS.
@@ -146,27 +177,38 @@ GCP Helix: GCP fundamentals, VPC networking, Cloud Storage, Cloud SQL, service a
 How to Use This Repository
 Pick a lab:
 
-New to Helix → start with Core Helix (helix-core/).
+Azure-focused: start with Helix on Azure (helix-azure/ → Project_Helix_Azure_lab.md).
 
-Want cloud fundamentals → pick AWS (helix-aws/) or GCP (helix-gcp/).
+Cloud-agnostic baseline: use Core Helix (helix-core/).
 
-Follow the 30‑day calendar in that lab’s README. The calendars define outcomes and checkpoints; you are expected to research missing details and work through issues yourself.
+AWS skills: use Helix on AWS (helix-aws/).
 
-Repeat on another platform to build a multi-cloud migration story for interviews and your portfolio.
+GCP skills: use Helix on GCP (helix-gcp/).
+
+Follow the 30‑day calendar in that lab’s README.
+The calendars define outcomes and checkpoints; you are expected to research missing details and work through issues yourself.
+
+Repeat on other platforms to build a multi-cloud migration story for interviews and your portfolio.
 
 Extend the design:
 
-Add monitoring/alerting (e.g., CloudWatch or Cloud Monitoring).
+Add monitoring/alerting (Azure Monitor, CloudWatch, Cloud Monitoring, etc.).
 
-Add CI/CD.
+Add CI/CD (e.g., GitHub Actions, Azure DevOps, CodePipeline, Cloud Build).
 
 Swap MySQL for Postgres or another engine in a variant.
 
 Repository Layout
 bash
 project-helix-cloud-series/
-├── helix-core/       # Original Helix (local Docker + Terraform + Ansible)
+├── helix-azure/      # Azure Helix (Azure MySQL + Terraform + Ansible)
+│   └── Project_Helix_Azure_lab.md
+├── helix-core/       # Core/local Helix (Docker + Terraform + Ansible)
+│   └── README.md
 ├── helix-aws/        # AWS Helix (S3 + RDS + Terraform)
+│   └── README.md
 ├── helix-gcp/        # GCP Helix (Cloud Storage + Cloud SQL + Terraform)
+│   └── README.md
 └── README.md         # This overview file
-Each lab folder contains its own README.md, infrastructure/, scripts/, data/, and docs/. The READMEs are foundations, not step-by-step tutorials: they give you the architecture, goals, and main commands; you are responsible for filling in the gaps, troubleshooting, and making implementation choices.
+Each lab folder contains its own README and subfolders such as infrastructure/, scripts/, data/, and docs/.
+These READMEs are deliberately foundational, not exhaustive; they set direction and expectations, but you are responsible for figuring out the finer details.
